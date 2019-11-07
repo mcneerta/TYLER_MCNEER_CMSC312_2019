@@ -1,5 +1,6 @@
 package src.com.example.dispatcher;
 
+import src.com.example.mmu.MMU;
 import src.com.example.process.Process;
 import src.com.example.cpu.CPU;
 import src.com.example.instruction.Instruction;
@@ -35,9 +36,11 @@ public class Dispatcher{
         System.out.println("Number of processes: " + processes.size());
         processes.get(position).setState(5);
         System.out.println("Passed set state 5");
+        MMU.memUsed -= processes.get(position).getMemory();
         processes.remove(position);
         System.out.println("Passed remove");
         System.out.println("Number of processes: " + processes.size());
+        OSDriver.memCheck(processes);
         OSDriver.getDispatcher(processes, position);
     }
 

@@ -1,6 +1,6 @@
 package src.com.example.osdriver;
 
-//test upload
+import src.com.example.mmu.MMU;
 import src.com.example.process.Process;
 import src.com.example.dispatcher.Dispatcher;
 import src.com.example.instruction.Instruction;
@@ -14,6 +14,8 @@ import java.util.Scanner;
 
 public class OSDriver{
 
+    public static ArrayList<Process> waitingQueue = new ArrayList<Process>();
+
     public static void main(String[] args)throws FileNotFoundException{
         int numProcesses = 0;
         int numFiles = 0;
@@ -24,7 +26,6 @@ public class OSDriver{
         int random = 0;
         int cyclePercent = 0;
         int index = 0;
-        int processIndex = 0;
         int numCycles = 0;
         int instructionIndex = 0;
         String name = " ";
@@ -38,7 +39,6 @@ public class OSDriver{
         while(numFiles != 0){
             index = 0;
             String inputFileName = promptForFileName();
-            //File readFile = getFile(inputFileName);
             System.out.println("Enter desired number of processes: ");
             numProcesses = input.nextInt();
 
@@ -46,22 +46,17 @@ public class OSDriver{
                 File readFile = getFile(inputFileName);
                 Scanner reader = new Scanner(readFile);
                 parse = reader.nextLine();
-                //System.out.println(parse);
                 numParse = parse.indexOf("Name:") + 5;
-                //System.out.println("numParse: " + numParse);
                 parse = parse.substring(numParse).trim();
                 name = parse;
-                //System.out.println(name);
                 parse = reader.nextLine();
                 numParse = parse.indexOf("Memory:") + 7;
                 parse = parse.substring(numParse).trim();
                 minMemory = Integer.parseInt(parse);
-                //System.out.println(minMemory);
                 parse = reader.nextLine();
                 numParse = parse.indexOf("Total runtime:") + 15;
                 parse = parse.substring(numParse).trim();
                 runtime = Integer.parseInt(parse);
-                //System.out.println(runtime);
 
 
                 System.out.println(numProcesses);
@@ -99,7 +94,6 @@ public class OSDriver{
                         numCycles = Integer.parseInt(parse);
                         cyclePercent = numCycles/5;
                         random = rand.nextInt(2);
-                        //System.out.println("Random: " + random);
 
                         if(random == 0){
                             numCycles = numCycles - ((int) Math.random() * cyclePercent);
@@ -117,8 +111,6 @@ public class OSDriver{
 
                     //Just sends program to waiting queue
                     else if(parse.contains("YIELD")){
-                        numParse = parse.indexOf("YIELD") + 5;
-                        parse = parse.substring(numParse).trim();
                         numCycles = 0;
                         System.out.println("yield");
                         Instruction next = new Instruction("YIELD", numCycles);
@@ -149,20 +141,15 @@ public class OSDriver{
                     parse = reader.nextLine();
                 }
                 process.setInstructions(instructions);
-                process.setState(4);
                 process.setRuntime(runtime);
                 System.out.println(runtime);
-                processes.add(process);
-                //  System.out.println("Added");
-                //  System.out.println("Number of processes: " + processes.size());
+                waitingQueue.add(process);
                 index++;
             }
 numFiles--;
 
 }
-            //while(!processes.isEmpty()){
-            processes = Scheduler.scheduling(processes);
-            //System.out.println("Number of processes: " + processes.size());
+            processes = memCheck(processes);
             getDispatcher(processes, 0);
         }
 
@@ -172,7 +159,6 @@ numFiles--;
         Scanner in = new Scanner(System.in);
         System.out.println("Enter an input file name: ");
         String inputFileName = in.next();
-        //System.out.println(" ");
         return inputFileName;
     }
 
@@ -228,5 +214,10 @@ numFiles--;
     }
 
         Dispatcher.dispatch(processes, position);
+    }
+
+    public static ArrayList<Process> memCheck(ArrayList<Process> processes){
+        processes = MMU.checkLimit(processes);
+        return  Scheduler.scheduling(processes);
     }
 }
