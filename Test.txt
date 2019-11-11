@@ -1,7 +1,9 @@
 Name: Test
 Memory: 50
 Total Runtime: 120
+CRITICAL
 CALCULATE 45
+END
 CALCULATE 55
 OUT 20
 EXE

@@ -10,11 +10,17 @@ import java.util.ArrayList;
 
 public class Dispatcher{
 
+    /*
+    ** Dispatch is made just to simulate the dispatcher placing a process on the CPU
+     */
     public static void dispatch(ArrayList<Process> processes, int position){
         processes.get(position).setState(2);
         CPU.processor(processes, position);
     }
 
+    /*
+    ** handleInterrupts handles I/O and Yield instructions and gives the calls the dispatcher for the next process
+     */
     public static void handleInterrupts(ArrayList<Process> processes, int position){
         int numCycles = 0;
         Process waitingProcess = processes.get(position);
@@ -32,6 +38,9 @@ public class Dispatcher{
         OSDriver.getDispatcher(processes, position);
     }
 
+    /*
+    ** handleTermination removes a process from the system and calls the dispatcher for the next process
+     */
     public static void handleTermination(ArrayList<Process> processes, int position){
         System.out.println("Number of processes: " + processes.size());
         processes.get(position).setState(5);

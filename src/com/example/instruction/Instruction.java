@@ -1,7 +1,14 @@
 package src.com.example.instruction;
 
+/*
+** This is the class to create instruction objects
+ */
 public class Instruction{
 
+    /*
+    ** instructionName is the name of the instruction
+    ** numCycles is the number of cycles it takes to complete the instruction
+     */
     private String instructionName;
     private int numCycles;
 

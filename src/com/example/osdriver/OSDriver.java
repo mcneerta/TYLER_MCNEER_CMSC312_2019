@@ -12,6 +12,9 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
 
+/*
+** This is the driver class for the OS simulator
+ */
 public class OSDriver{
 
     public static ArrayList<Process> waitingQueue = new ArrayList<Process>();
@@ -36,12 +39,18 @@ public class OSDriver{
         System.out.println("Enter desired number of program files: ");
         numFiles = input.nextInt();
 
+        /*
+        ** This while loop loops the entire process for creating processes for each of the different files
+         */
         while(numFiles != 0){
             index = 0;
             String inputFileName = promptForFileName();
             System.out.println("Enter desired number of processes: ");
             numProcesses = input.nextInt();
 
+            /*
+            ** This while loop loops for the selected number of processes from a specifies
+             */
             while(index < numProcesses){
                 File readFile = getFile(inputFileName);
                 Scanner reader = new Scanner(readFile);
@@ -64,15 +73,21 @@ public class OSDriver{
                 Process process = new Process(state, minMemory, runtime, name, instructions, instructionIndex);
                 runtime = 0;
 
+                /*
+                **This while loop reads in all the instructions of the process from the file
+                 */
                 while(!parse.contains("EXE")){
 
+                    /*
+                     ** This reads in the calculate instruction and randomally edits
+                     ** the number of cycles needed to complete the instruction
+                     */
                     if(parse.contains("CALCULATE")){
                         numParse = parse.indexOf("CALCULATE") + 9;
                         parse = parse.substring(numParse).trim();
                         numCycles = Integer.parseInt(parse);
                         cyclePercent = numCycles/5;
                         random = rand.nextInt(2);
-                        //System.out.println("Random: " + random);
 
                         if(random == 0){
                             numCycles = numCycles - rand.nextInt(cyclePercent);
@@ -88,6 +103,10 @@ public class OSDriver{
                         instructions.add(next);
                     }
 
+                    /*
+                     ** This reads in the i/o instruction and randomally edits
+                     ** the number of cycles needed to complete the instruction
+                     */
                     else if(parse.contains("I/O")){
                         numParse = parse.indexOf("I/O") + 3;
                         parse = parse.substring(numParse).trim();
@@ -109,7 +128,9 @@ public class OSDriver{
                         instructions.add(next);
                     }
 
-                    //Just sends program to waiting queue
+                    /*
+                    ** This reads in the yield instruction
+                     */
                     else if(parse.contains("YIELD")){
                         numCycles = 0;
                         System.out.println("yield");
@@ -117,6 +138,30 @@ public class OSDriver{
                         instructions.add(next);
                     }
 
+                    /*
+                     ** This reads in the critical instruction
+                     */
+                    else if(parse.contains("CRITICAL")){
+                        numCycles = 0;
+                        System.out.println("critical");
+                        Instruction next = new Instruction("CRITICAL", numCycles);
+                        instructions.add(next);
+                    }
+
+                    /*
+                     ** This reads in the end instruction
+                     */
+                    else if(parse.contains("END")){
+                        numCycles = 0;
+                        System.out.println("end");
+                        Instruction next = new Instruction("END", numCycles);
+                        instructions.add(next);
+                    }
+
+                    /*
+                     ** This reads in the out instruction and randomally edits
+                     ** the number of cycles needed to complete the instruction
+                     */
                     else if(parse.contains("OUT")){
                         numParse = parse.indexOf("OUT") + 3;
                         parse = parse.substring(numParse).trim();
@@ -155,6 +200,9 @@ numFiles--;
 
 
 
+    /*
+    ** promptForFileName simply prompts the user for the file name and returns the given string
+     */
     public static String promptForFileName(){
         Scanner in = new Scanner(System.in);
         System.out.println("Enter an input file name: ");
@@ -162,6 +210,10 @@ numFiles--;
         return inputFileName;
     }
 
+    /*
+    ** getFile verifies that the file exists and returns it if it does exists
+    ** and prompts the user again if it does not
+     */
     private static File getFile(String fileName){
         boolean isFile = false;
         File myFile = new File(fileName);
@@ -197,6 +249,10 @@ numFiles--;
         return myFile;
     }
 
+    /*
+    ** getDispatcher checks if there are any processes remaining and if there are it calls
+    ** dispatch in the Dispatcher class
+     */
     public static void getDispatcher(ArrayList<Process> processes, int position){
 
         if(processes.size() == 0){
@@ -216,6 +272,9 @@ numFiles--;
         Dispatcher.dispatch(processes, position);
     }
 
+    /*
+    ** memCheck calls checkLimit to load all possible processes in memory
+     */
     public static ArrayList<Process> memCheck(ArrayList<Process> processes){
         processes = MMU.checkLimit(processes);
         return  Scheduler.scheduling(processes);

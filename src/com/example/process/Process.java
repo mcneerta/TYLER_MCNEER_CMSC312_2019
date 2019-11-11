@@ -1,9 +1,11 @@
 package src.com.example.process;
 
 import src.com.example.instruction.Instruction;
-
 import java.util.ArrayList;
 
+/*
+** Process is the class to create new process objects
+ */
 public class Process{
 
     /*
@@ -14,6 +16,14 @@ public class Process{
      ** State 5 = terminated state
      */
     private int currentState;
+
+    /*
+    ** minMemory is the minimum memory required to run the process
+    ** totRuntime is the total runtime of the process
+    ** instructionNum is the number of instruction for the process
+    ** processName is the name of the process
+    ** instructions is the arrayList of instruction objects for the process
+     */
     private int minMemory;
     private int totRuntime;
     private int instructionNum;
