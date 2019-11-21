@@ -15,6 +15,7 @@ public class CPU{
      */
     private static Boolean lockAvailable = true;
 
+    public static int totalTime = 0;
     /*
     ** processor is used to simulate running a process and handling instructions
      */
@@ -43,6 +44,7 @@ public class CPU{
                     System.out.println("Number of cycles: " + numCycles);
                     numCycles--;
                     runtimeRemaining--;
+                    totalTime++;
                 }
                 running.setRuntime(runtimeRemaining);
             }
@@ -86,12 +88,14 @@ public class CPU{
                     System.out.println("Number of cycles: " + numCycles);
                     numCycles--;
                     runtimeRemaining--;
+                    totalTime++;
                 }
                 running.setRuntime(runtimeRemaining);
 
                 System.out.println("Name: " + running.getName());
                 System.out.println("Memory needed: " + running.getMemory());
                 System.out.println("Runtime remaining: " + running.getRuntime());
+                System.out.println("Process priority: " + running.getPriority());
             }
             index++;
             running.setIndex(index);
