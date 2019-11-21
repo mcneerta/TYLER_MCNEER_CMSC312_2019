@@ -27,16 +27,19 @@ public class Process{
     private int minMemory;
     private int totRuntime;
     private int instructionNum;
+    private int processPriority;
     private String processName;
-    private ArrayList<Instruction> instructions = new ArrayList<>();
+    private ArrayList<Instruction> instructionsList = new ArrayList<>();
 
 
-    public Process(int state, int memory, int runtime, String name, ArrayList<Instruction> instructions, int index){
+    public Process(int state, int memory, int runtime, String name, ArrayList<Instruction> instructions, int index, int priority){
         currentState = state;
         minMemory = memory;
         totRuntime = runtime;
         processName = name;
-        this.instructions = instructions;
+        instructionNum = index;
+        instructionsList = instructions;
+        processPriority = priority;
     }
 
     public void setState(int state){
@@ -72,11 +75,11 @@ public class Process{
     }
 
     public void setInstructions(ArrayList<Instruction> instructions){
-        this.instructions = instructions;
+        instructionsList = instructions;
     }
 
     public ArrayList<Instruction> getInstructions(){
-        return instructions;
+        return instructionsList;
     }
 
     public void setIndex(int index){
@@ -85,6 +88,14 @@ public class Process{
 
     public int getIndex(){
         return instructionNum;
+    }
+
+    public void setPriority(int priority){
+        processPriority = priority;
+    }
+
+    public int getPriority(){
+        return processPriority;
     }
 
 }

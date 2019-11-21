@@ -1,5 +1,6 @@
 package src.com.example.osdriver;
 
+import src.com.example.cpu.CPU;
 import src.com.example.mmu.MMU;
 import src.com.example.process.Process;
 import src.com.example.dispatcher.Dispatcher;
@@ -12,12 +13,17 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
 
+import static src.com.example.mmu.MMU.checkLimitRR;
+
 /*
 ** This is the driver class for the OS simulator
  */
 public class OSDriver{
 
     public static ArrayList<Process> waitingQueue = new ArrayList<Process>();
+    public static int schedulerFlag = 0;
+    public static int position = 0;
+    public static ArrayList<Process> compareProcesses = new ArrayList<Process>();
 
     public static void main(String[] args)throws FileNotFoundException{
         int numProcesses = 0;
@@ -70,7 +76,7 @@ public class OSDriver{
 
                 System.out.println(numProcesses);
                 ArrayList<Instruction> instructions = new ArrayList<Instruction>();
-                Process process = new Process(state, minMemory, runtime, name, instructions, instructionIndex);
+                Process process = new Process(state, minMemory, runtime, name, instructions, instructionIndex, 0);
                 runtime = 0;
 
                 /*
@@ -188,14 +194,17 @@ public class OSDriver{
                 process.setInstructions(instructions);
                 process.setRuntime(runtime);
                 System.out.println(runtime);
+                process.setPriority(rand.nextInt(10) + 1);
                 waitingQueue.add(process);
+                compareProcesses.add(process);
                 index++;
             }
 numFiles--;
 
 }
+
             processes = memCheck(processes);
-            getDispatcher(processes, 0);
+            getDispatcher(processes);
         }
 
 
@@ -253,10 +262,26 @@ numFiles--;
     ** getDispatcher checks if there are any processes remaining and if there are it calls
     ** dispatch in the Dispatcher class
      */
-    public static void getDispatcher(ArrayList<Process> processes, int position){
+    public static void getDispatcher(ArrayList<Process> processes){
+
+        if(processes.size() == 0 && compareProcesses.size() == 0){
+            System.exit(0);
+        }
 
         if(processes.size() == 0){
-            System.exit(0);
+            schedulerFlag = 1;
+            MMU.memUsed = 0;
+            position = 0;
+            CPU.totalTime = 0;
+            int time = 0;
+            for(int i = 0; i < compareProcesses.size(); i++){
+                Process p = compareProcesses.get(i);
+                time = calcRuntime(p);
+                p.setRuntime(time);
+            }
+            compareProcesses = checkLimitRR(compareProcesses);
+            compareProcesses = Scheduler.scheduling(compareProcesses);
+            Dispatcher.dispatch(compareProcesses);
         }
 
         if(position == processes.size()){
@@ -269,7 +294,7 @@ numFiles--;
       }
     }
 
-        Dispatcher.dispatch(processes, position);
+        Dispatcher.dispatch(processes);
     }
 
     /*
@@ -278,5 +303,13 @@ numFiles--;
     public static ArrayList<Process> memCheck(ArrayList<Process> processes){
         processes = MMU.checkLimit(processes);
         return  Scheduler.scheduling(processes);
+    }
+
+    private static int calcRuntime(Process process){
+        int time = 0;
+        for(Instruction i : process.getInstructions()){
+            time += i.getCycles();
+        }
+        return time;
     }
 }
