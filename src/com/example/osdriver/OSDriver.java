@@ -23,6 +23,7 @@ public class OSDriver{
     public static ArrayList<Process> waitingQueue = new ArrayList<Process>();
     public static int schedulerFlag = 0;
     public static int position = 0;
+    public static int quitTime = 0;
     public static ArrayList<Process> compareProcesses = new ArrayList<Process>();
 
     public static void main(String[] args)throws FileNotFoundException{
@@ -36,6 +37,7 @@ public class OSDriver{
         int cyclePercent = 0;
         int index = 0;
         int numCycles = 0;
+
         int instructionIndex = 0;
         String name = " ";
         String parse = " ";
@@ -44,6 +46,8 @@ public class OSDriver{
         Scanner input = new Scanner(System.in);
         System.out.println("Enter desired number of program files: ");
         numFiles = input.nextInt();
+        System.out.println("Enter how many cycles for the simulator to run (0 indicates a complete run): ");
+        quitTime = input.nextInt();
 
         /*
         ** This while loop loops the entire process for creating processes for each of the different files

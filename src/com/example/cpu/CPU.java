@@ -42,12 +42,20 @@ public class CPU{
                 Instruction runningInstruction = instructions.get(index);
                 numCycles = runningInstruction.getCycles();
 
+                if(totalTime == OSDriver.quitTime && OSDriver.quitTime != 0){
+                    System.exit(0);
+                }
 
                 /*
                  ** This handles calculate instructions and adjusts the remaining runtime
                  */
                 if (runningInstruction.getInstructionName().equals("CALCULATE")) {
                     while (numCycles != 0) {
+
+                        if(totalTime == OSDriver.quitTime && OSDriver.quitTime != 0){
+                            System.exit(0);
+                        }
+
                         System.out.println("Number of cycles: " + numCycles);
                         numCycles--;
                         runtimeRemaining--;
@@ -92,6 +100,11 @@ public class CPU{
                  */
                 else if (runningInstruction.getInstructionName().equals("OUT")) {
                     while (numCycles != 0) {
+
+                        if(totalTime == OSDriver.quitTime && OSDriver.quitTime != 0){
+                            System.exit(0);
+                        }
+
                         System.out.println("Number of cycles: " + numCycles);
                         numCycles--;
                         runtimeRemaining--;
@@ -115,11 +128,20 @@ public class CPU{
                 Instruction runningInstruction = instructions.get(index);
                 numCycles = runningInstruction.getCycles();
 
+                if(totalTime == OSDriver.quitTime && OSDriver.quitTime != 0){
+                    System.exit(0);
+                }
+
                 /*
                  ** This handles calculate instructions and adjusts the remaining runtime
                  */
                 if (runningInstruction.getInstructionName().equals("CALCULATE")) {
                     while (numCycles != 0 && (timeQuantum > 0 || lockAvailable == false)) {
+
+                        if(totalTime == OSDriver.quitTime && OSDriver.quitTime != 0){
+                            System.exit(0);
+                        }
+
                         System.out.println("Number of cycles: " + numCycles);
                         numCycles--;
                         runtimeRemaining--;
@@ -166,6 +188,11 @@ public class CPU{
                  */
                 else if (runningInstruction.getInstructionName().equals("OUT")) {
                     while (numCycles != 0 && (timeQuantum > 0 || lockAvailable == false)) {
+
+                        if(totalTime == OSDriver.quitTime && OSDriver.quitTime != 0){
+                            System.exit(0);
+                        }
+
                         System.out.println("Number of cycles: " + numCycles);
                         numCycles--;
                         runtimeRemaining--;
