@@ -4,6 +4,7 @@ package src.com.example.mmu;
 import src.com.example.osdriver.OSDriver;
 import src.com.example.process.Process;
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
 import static src.com.example.osdriver.OSDriver.compareProcesses;
@@ -24,7 +25,7 @@ public class MMU {
     /*
     ** checkLimit admits as many processes as possible into memory and returns an arrayList of the admitted processes
      */
-    public static ArrayList<Process> checkLimit(ArrayList<Process> processes) {
+    public static ArrayList<Process> checkLimit(ArrayList<Process> processes)throws FileNotFoundException{
         if(processes.size() == 0 && waitingQueue.size() == 0 && compareProcesses.size() == 0){
             System.exit(0);
         }

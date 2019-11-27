@@ -37,7 +37,6 @@ public class OSDriver{
         int cyclePercent = 0;
         int index = 0;
         int numCycles = 0;
-
         int instructionIndex = 0;
         String name = " ";
         String parse = " ";
@@ -80,7 +79,7 @@ public class OSDriver{
 
                 System.out.println(numProcesses);
                 ArrayList<Instruction> instructions = new ArrayList<Instruction>();
-                Process process = new Process(state, minMemory, runtime, name, instructions, instructionIndex, 0);
+                Process process = new Process(state, minMemory, runtime, name, instructions, instructionIndex, 0, 0);
                 runtime = 0;
 
                 /*
@@ -168,6 +167,13 @@ public class OSDriver{
                         instructions.add(next);
                     }
 
+                    else if(parse.contains("FORK")){
+                        numCycles = 0;
+                        System.out.println("fork");
+                        Instruction next = new Instruction("FORK", numCycles);
+                        instructions.add(next);
+                    }
+
                     /*
                      ** This reads in the out instruction and randomally edits
                      ** the number of cycles needed to complete the instruction
@@ -199,6 +205,7 @@ public class OSDriver{
                 process.setRuntime(runtime);
                 System.out.println(runtime);
                 process.setPriority(rand.nextInt(10) + 1);
+                process.setVariable(rand.nextInt(100)+ 1);
                 waitingQueue.add(process);
                 compareProcesses.add(process);
                 index++;
@@ -266,7 +273,7 @@ numFiles--;
     ** getDispatcher checks if there are any processes remaining and if there are it calls
     ** dispatch in the Dispatcher class
      */
-    public static void getDispatcher(ArrayList<Process> processes){
+    public static void getDispatcher(ArrayList<Process> processes)throws FileNotFoundException{
 
         if(processes.size() == 0 && compareProcesses.size() == 0){
             System.exit(0);
@@ -304,7 +311,7 @@ numFiles--;
     /*
     ** memCheck calls checkLimit to load all possible processes in memory
      */
-    public static ArrayList<Process> memCheck(ArrayList<Process> processes){
+    public static ArrayList<Process> memCheck(ArrayList<Process> processes)throws FileNotFoundException{
         processes = MMU.checkLimit(processes);
         return  Scheduler.scheduling(processes);
     }

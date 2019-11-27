@@ -28,11 +28,13 @@ public class Process{
     private int totRuntime;
     private int instructionNum;
     private int processPriority;
+    private int variableNum;
     private String processName;
     private ArrayList<Instruction> instructionsList = new ArrayList<>();
 
 
-    public Process(int state, int memory, int runtime, String name, ArrayList<Instruction> instructions, int index, int priority){
+
+    public Process(int state, int memory, int runtime, String name, ArrayList<Instruction> instructions, int index, int priority, int variable){
         currentState = state;
         minMemory = memory;
         totRuntime = runtime;
@@ -40,6 +42,7 @@ public class Process{
         instructionNum = index;
         instructionsList = instructions;
         processPriority = priority;
+        variableNum = variable;
     }
 
     public void setState(int state){
@@ -96,6 +99,14 @@ public class Process{
 
     public int getPriority(){
         return processPriority;
+    }
+
+    public void setVariable(int variable){
+        variableNum = variable;
+    }
+
+    public int getVariable(){
+        return variableNum;
     }
 
 }

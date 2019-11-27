@@ -6,6 +6,7 @@ import src.com.example.cpu.CPU;
 import src.com.example.instruction.Instruction;
 import src.com.example.osdriver.OSDriver;
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
 public class Dispatcher{
@@ -13,7 +14,7 @@ public class Dispatcher{
     /*
     ** Dispatch is made just to simulate the dispatcher placing a process on the CPU
      */
-    public static void dispatch(ArrayList<Process> processes){
+    public static void dispatch(ArrayList<Process> processes) throws FileNotFoundException {
         processes.get(OSDriver.position).setState(2);
         CPU.processor(processes);
     }
@@ -21,7 +22,7 @@ public class Dispatcher{
     /*
     ** handleInterrupts handles I/O and Yield instructions and gives the calls the dispatcher for the next process
      */
-    public static void handleInterrupts(ArrayList<Process> processes){
+    public static void handleInterrupts(ArrayList<Process> processes)throws FileNotFoundException{
         int numCycles = 0;
         Process waitingProcess = processes.get(OSDriver.position);
         int runtimeRemaining = waitingProcess.getRuntime();
@@ -38,15 +39,15 @@ public class Dispatcher{
         OSDriver.getDispatcher(processes);
     }
 
-    public static void handleTimeout(ArrayList<Process> processes){
-        OSDriver.position++;
-        OSDriver.getDispatcher(processes);
+    public static void handleTimeout(ArrayList<Process> processes)throws FileNotFoundException{
+            OSDriver.position++;
+            OSDriver.getDispatcher(processes);
     }
 
     /*
     ** handleTermination removes a process from the system and calls the dispatcher for the next process
      */
-    public static void handleTermination(ArrayList<Process> processes){
+    public static void handleTermination(ArrayList<Process> processes)throws FileNotFoundException{
         System.out.println("Number of processes: " + processes.size());
         processes.get(OSDriver.position).setState(5);
         MMU.memUsed -= processes.get(OSDriver.position).getMemory();
