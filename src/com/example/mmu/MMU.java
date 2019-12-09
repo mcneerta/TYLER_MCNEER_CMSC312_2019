@@ -1,6 +1,7 @@
 package src.com.example.mmu;
 
 
+import org.omg.CORBA.INITIALIZE;
 import src.com.example.osdriver.OSDriver;
 import src.com.example.process.Process;
 
@@ -25,13 +26,13 @@ public class MMU {
     /*
     ** checkLimit admits as many processes as possible into memory and returns an arrayList of the admitted processes
      */
-    public static ArrayList<Process> checkLimit(ArrayList<Process> processes)throws FileNotFoundException{
+    synchronized public static ArrayList<Process> checkLimit(ArrayList<Process> processes)throws FileNotFoundException, InterruptedException{
         if(processes.size() == 0 && waitingQueue.size() == 0 && compareProcesses.size() == 0){
             System.exit(0);
         }
 
         else if(processes.size() == 0 && waitingQueue.size() == 0){
-            OSDriver.getDispatcher(processes);
+            OSDriver.getDispatcher();
         }
 
         while(!waitingQueue.isEmpty()){

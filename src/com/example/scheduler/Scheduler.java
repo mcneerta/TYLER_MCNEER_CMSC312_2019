@@ -10,12 +10,13 @@ public class Scheduler{
 
 
     public static ArrayList<Process> scheduling(ArrayList<Process> processes){
-        if(OSDriver.schedulerFlag == 0) {
-            Collections.sort(processes, new SJF());
-        }
-        else{
-            Collections.sort(processes, new RR());
-        }
+        Collections.sort(processes, new SJF());
+        System.out.println("Number of processes: " + processes.size());
+        return processes;
+    }
+
+    public static ArrayList<Process> rrScheduling(ArrayList<Process> processes){
+        Collections.sort(processes, new RR());
         System.out.println("Number of processes: " + processes.size());
         return processes;
     }
