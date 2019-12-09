@@ -47,6 +47,7 @@ public class Dispatcher{
         waitingProcess.setRuntime(runtimeRemaining);
         waitingProcess.setState(4);
         waitingProcess.setIndex(waitingProcess.getIndex() + 1);
+        waitingProcess.getPageTable().remove(0);
         OSDriver.position++;
         OSDriver.getDispatcher();
     }
@@ -63,6 +64,7 @@ public class Dispatcher{
         waitingProcess.setRuntime(runtimeRemaining);
         waitingProcess.setState(4);
         waitingProcess.setIndex(waitingProcess.getIndex() + 1);
+        waitingProcess.getPageTable().remove(0);
         OSDriver.rrPosition++;
         OSDriver.getRRDispatcher();
     }

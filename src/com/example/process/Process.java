@@ -31,10 +31,11 @@ public class Process{
     private int variableNum;
     private String processName;
     private ArrayList<Instruction> instructionsList = new ArrayList<>();
+    private ArrayList<Integer> pageTable = new ArrayList<>();
 
 
 
-    public Process(int state, int memory, int runtime, String name, ArrayList<Instruction> instructions, int index, int priority, int variable){
+    public Process(int state, int memory, int runtime, String name, ArrayList<Instruction> instructions, int index, int priority, int variable, ArrayList<Integer> pageNumberLookup){
         currentState = state;
         minMemory = memory;
         totRuntime = runtime;
@@ -43,6 +44,7 @@ public class Process{
         instructionsList = instructions;
         processPriority = priority;
         variableNum = variable;
+        pageTable = pageNumberLookup;
     }
 
     public void setState(int state){
@@ -107,6 +109,14 @@ public class Process{
 
     public int getVariable(){
         return variableNum;
+    }
+
+    public void setPageTable(ArrayList<Integer> pageNumberTable){
+        pageTable = pageNumberTable;
+    }
+
+    public ArrayList<Integer> getPageTable(){
+        return pageTable;
     }
 
 }

@@ -1,6 +1,7 @@
 package src.com.example.cpu;
 
 import src.com.example.osdriver.OSDriver;
+import src.com.example.page.Page;
 import src.com.example.process.Process;
 import src.com.example.dispatcher.Dispatcher;
 import src.com.example.instruction.Instruction;
@@ -14,6 +15,8 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
 
+import static src.com.example.mmu.MMU.globalPageTable;
+import static src.com.example.osdriver.OSDriver.compareProcesses;
 import static src.com.example.osdriver.OSDriver.processes;
 
 /*
@@ -28,14 +31,13 @@ public class CPU{
     public static int timeQuantum = 50;
 
     private static ArrayList<Integer> mailboxes = new ArrayList<>();
-    //public static int totalTime = 0;
     public static ProcessList processesThread = new ProcessList(processes,0);
     public static RRProcessList rrProcessesThread = new RRProcessList(OSDriver.compareProcesses,0);
 
     /*
     ** processor is used to simulate running a process and handling instructions
      */
-    public static void processor(ArrayList<Process> processes)throws FileNotFoundException, InterruptedException{
+    synchronized public static void processor(ArrayList<Process> processes)throws FileNotFoundException, InterruptedException{
         Process running;
 
         if(processes.size() > 1){
@@ -57,9 +59,11 @@ public class CPU{
         /*
         ** This while loop goes through all instructions
          */
-            while (running.getIndex() < instructions.size()) {
+            while (running.getIndex() < instructions.size() && running.getPageTable().size() != 0) {
+                int currentPageNum = running.getPageTable().get(0);
                 index = running.getIndex();
-                Instruction runningInstruction = instructions.get(index);
+                Page currentPage = globalPageTable.get(currentPageNum);
+                Instruction runningInstruction = currentPage.getInstruction();
                 numCycles = runningInstruction.getCycles();
 
                 if(processesThread.getTime() == OSDriver.quitTime && OSDriver.quitTime != 0){
@@ -80,9 +84,15 @@ public class CPU{
                         numCycles--;
                         runtimeRemaining--;
                         processesThread.setTime(processesThread.getTime()+1);
-                        processesThread.sleep(10);
+                        try {
+                            processesThread.sleep(10);
+                        }
+                        catch(InterruptedException e){
+
+                        }
                     }
                     running.setRuntime(runtimeRemaining);
+                    running.getPageTable().remove(0);
                 }
 
                 /*
@@ -97,12 +107,18 @@ public class CPU{
                  */
                 else if (runningInstruction.getInstructionName().equals("CRITICAL")) {
                     if(!lockAvailable)
-                        System.out.println("Waiting for lock");
+                        System.out.println("Waiting for lock(Normal)");
 
                     while (!lockAvailable) {
+                        try {
+                            processesThread.sleep(10);
+                        }
+                        catch(InterruptedException e){
 
+                        }
                     }
                     lockAvailable = false;
+                    running.getPageTable().remove(0);
                 }
 
                 /*
@@ -110,11 +126,13 @@ public class CPU{
                  */
                 else if (runningInstruction.getInstructionName().equals("END")) {
                     lockAvailable = true;
+                    running.getPageTable().remove(0);
                 }
 
                 else if (runningInstruction.getInstructionName().equals("FORK")) {
                     childTime = handleFork(running);
                     processesThread.setTime(processesThread.getTime() - 95);//- childTime);
+                    running.getPageTable().remove(0);
                 }
 
                 /*
@@ -126,6 +144,7 @@ public class CPU{
 
                 else if (runningInstruction.getInstructionName().equals("RECEIVE")) {
                     running.setVariable(mailboxes.get(mailboxes.size()-1));
+                    running.getPageTable().remove(0);
                 }
 
                 /*
@@ -142,15 +161,24 @@ public class CPU{
                         numCycles--;
                         runtimeRemaining--;
                         processesThread.setTime(processesThread.getTime()+1);
-                        processesThread.sleep(10);
+                        try {
+                            processesThread.sleep(10);
+                        }
+                        catch(InterruptedException e){
+
+                        }
                     }
                     running.setRuntime(runtimeRemaining);
+                    if(running.getPageTable().size() != 0) {
+                        running.getPageTable().remove(0);
+                    }
 
                     System.out.println("Name: " + running.getName());
                     System.out.println("Memory needed: " + running.getMemory());
                     System.out.println("Runtime remaining: " + running.getRuntime());
                     System.out.println("Process priority: " + running.getPriority());
                     System.out.println("Process variable: " + running.getVariable());
+
                 }
                 index++;
                 running.setIndex(index);
@@ -161,15 +189,15 @@ public class CPU{
 
     }
 
-    public static void rrProcessor(ArrayList<Process> processes) throws FileNotFoundException, InterruptedException{
+    synchronized public static void rrProcessor(ArrayList<Process> processes) throws FileNotFoundException, InterruptedException{
         Process running;
 
         if(processes.size() > 1){
-            running = processes.get(OSDriver.rrPosition);
+            running = compareProcesses.get(OSDriver.rrPosition);
         }
 
         else{
-            running = processes.get(0);
+            running = compareProcesses.get(0);
         }
         int runtimeRemaining = running.getRuntime();
         int index = running.getIndex();
@@ -180,9 +208,11 @@ public class CPU{
         System.out.println("Index: " + index);
         System.out.println("Number of instructions remaining: " + (instructions.size() - index));
 
-        while (running.getIndex() < instructions.size() && (timeQuantum > 0 || lockAvailable == false)) {
+        while (running.getIndex() < instructions.size() && (timeQuantum > 0 || lockAvailable == false) && running.getPageTable().size() != 0) {
+            int currentPageNum = running.getPageTable().get(0);
             index = running.getIndex();
-            Instruction runningInstruction = instructions.get(index);
+            Page currentPage = globalPageTable.get(currentPageNum);
+            Instruction runningInstruction = currentPage.getInstruction();
             numCycles = runningInstruction.getCycles();
 
             if(rrProcessesThread.getTime() == OSDriver.quitTime && OSDriver.quitTime != 0){
@@ -199,15 +229,21 @@ public class CPU{
                         System.exit(0);
                     }
 
-                    //System.out.println("Number of cycles: " + numCycles);
+                    System.out.println("Number of cycles: " + numCycles);
                     numCycles--;
                     runtimeRemaining--;
                     rrProcessesThread.setTime(rrProcessesThread.getTime()+1);
                     timeQuantum--;
                     runningInstruction.setCycles(numCycles);
-                    rrProcessesThread.sleep(10);
+                    try {
+                        rrProcessesThread.sleep(10);
+                    }
+                    catch(InterruptedException e){
+
+                    }
                 }
                 running.setRuntime(runtimeRemaining);
+                running.getPageTable().remove(0);
             }
 
             /*
@@ -226,9 +262,15 @@ public class CPU{
                 }
 
                 while (!lockAvailable) {
+                    try {
+                        rrProcessesThread.sleep(10);
+                    }
+                    catch(InterruptedException e){
 
+                    }
                 }
                 lockAvailable = false;
+                running.getPageTable().remove(0);
             }
 
             /*
@@ -236,11 +278,13 @@ public class CPU{
              */
             else if (runningInstruction.getInstructionName().equals("END")) {
                 lockAvailable = true;
+                running.getPageTable().remove(0);
             }
 
             else if (runningInstruction.getInstructionName().equals("FORK")) {
                 childTime = handleFork(running);
                 rrProcessesThread.setTime(rrProcessesThread.getTime() + 95);//childTime);
+                running.getPageTable().remove(0);
             }
 
             /*
@@ -252,6 +296,7 @@ public class CPU{
 
             else if (runningInstruction.getInstructionName().equals("RECEIVE")) {
                 running.setVariable(mailboxes.get(mailboxes.size()-1));
+                running.getPageTable().remove(0);
             }
 
             /*
@@ -264,25 +309,34 @@ public class CPU{
                         System.exit(0);
                     }
 
-                    //System.out.println("Number of cycles: " + numCycles);
+                    System.out.println("Number of cycles: " + numCycles);
                     numCycles--;
                     runtimeRemaining--;
                     rrProcessesThread.setTime(rrProcessesThread.getTime()+1);
                     timeQuantum--;
                     runningInstruction.setCycles(numCycles);
-                    rrProcessesThread.sleep(10);
+                    try {
+                        rrProcessesThread.sleep(10);
+                    }
+                    catch(InterruptedException e){
+
+                    }
                 }
                 running.setRuntime(runtimeRemaining);
+                if(running.getPageTable().size() != 0) {
+                    running.getPageTable().remove(0);
+                }
 
                 if(numCycles == 0) {
                     System.out.println("Name: " + running.getName());
                     System.out.println("Memory needed: " + running.getMemory());
-                    System.out.println("Runtime remaining: " + running.getRuntime());
+                    //System.out.println("Runtime remaining: " + running.getRuntime());
                     System.out.println("Process priority: " + running.getPriority());
                     System.out.println("Process variable: " + running.getVariable());
                 }
+
             }
-            if(timeQuantum > 0 || lockAvailable == false) {
+            if(timeQuantum > 0 || !lockAvailable) {
                 index++;
                 running.setIndex(index);
             }
@@ -327,7 +381,8 @@ public class CPU{
 
         ArrayList<Instruction> instructions = new ArrayList<Instruction>();
         ArrayList<Process> childList = new ArrayList<Process>();
-        Process childProcess = new Process(1, 0, runtime, name, instructions, 0, 0, 0);
+        ArrayList<Integer> pageTable = new ArrayList<>();
+        Process childProcess = new Process(1, 0, runtime, name, instructions, 0, 0, 0, pageTable);
 
         while (!parse.contains("EXE")) {
 
@@ -420,6 +475,11 @@ public class CPU{
             parse = reader.nextLine();
         }
         childProcess.setInstructions(instructions);
+        for(Instruction i : instructions){
+            Page newPage = new Page(i);
+            globalPageTable.add(newPage);
+            childProcess.getPageTable().add(globalPageTable.size()-1);
+        }
         childProcess.setRuntime(runtime);
         System.out.println(runtime);
         childProcess.setPriority(rand.nextInt(10) + 1);

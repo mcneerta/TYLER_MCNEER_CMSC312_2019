@@ -1,8 +1,10 @@
 package src.com.example.mmu;
 
 
-import org.omg.CORBA.INITIALIZE;
+
+import src.com.example.instruction.Instruction;
 import src.com.example.osdriver.OSDriver;
+import src.com.example.page.Page;
 import src.com.example.process.Process;
 
 import java.io.FileNotFoundException;
@@ -22,6 +24,7 @@ public class MMU {
      */
     public static int memUsed = 0;
     private static int memLimit = 250;
+    public static ArrayList<Page> globalPageTable = new ArrayList<>();
 
     /*
     ** checkLimit admits as many processes as possible into memory and returns an arrayList of the admitted processes
@@ -46,6 +49,11 @@ public class MMU {
                     memUsed += p.getMemory();
                     p.setState(4);
                     processes.add(p);
+                    for(Instruction i : p.getInstructions()){
+                        Page newPage = new Page(i);
+                        globalPageTable.add(newPage);
+                        p.getPageTable().add(globalPageTable.size()-1);
+                    }
                     waitingQueue.remove(0);
                     System.out.println("Added to memory!");
                 }
@@ -86,6 +94,11 @@ public class MMU {
                     p.setState(4);
                     p.setIndex(0);
                     compareProcesses.add(p);
+                    for(Instruction i : p.getInstructions()){
+                        Page newPage = new Page(i);
+                        globalPageTable.add(newPage);
+                        p.getPageTable().add(globalPageTable.size()-1);
+                    }
                     waitingQueue.remove(0);
                     System.out.println("Added to memory!");
                 }

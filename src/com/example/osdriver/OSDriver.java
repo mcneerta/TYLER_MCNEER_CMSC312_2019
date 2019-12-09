@@ -81,7 +81,8 @@ public class OSDriver {
 
                 //System.out.println(numProcesses);
                 ArrayList<Instruction> instructions = new ArrayList<Instruction>();
-                Process process = new Process(state, minMemory, runtime, name, instructions, instructionIndex, 0, 0);
+                ArrayList<Integer> pageTable = new ArrayList<>();
+                Process process = new Process(state, minMemory, runtime, name, instructions, instructionIndex, 0, 0, pageTable);
                 runtime = 0;
 
                 /*
@@ -275,19 +276,6 @@ public class OSDriver {
         if (processes.size() == 0) {
             CPU.processesThread.interrupt();
             System.out.println("Thread interrupted");
-           /* schedulerFlag = 1;
-            MMU.memUsed = 0;
-            position = 0;
-            CPU.totalTime = 0;
-            int time = 0;
-            for(int i = 0; i < compareProcesses.size(); i++){
-                Process p = compareProcesses.get(i);
-                time = calcRuntime(p);
-                p.setRuntime(time);
-            }
-            compareProcesses = checkLimitRR(compareProcesses);
-            compareProcesses = Scheduler.scheduling(compareProcesses);
-            Dispatcher.dispatch(compareProcesses);*/
         }
 
 
@@ -329,7 +317,7 @@ public class OSDriver {
         if(rrPosition == compareProcesses.size()){
             rrPosition = 0;
         }
-
+        compareProcesses = MMU.checkLimitRR(compareProcesses);
         Dispatcher.rrDispatch(compareProcesses);
     }
     /*
