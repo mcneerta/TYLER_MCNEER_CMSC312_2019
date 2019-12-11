@@ -21,29 +21,30 @@ import static src.com.example.mmu.MMU.checkLimitRR;
 public class OSDriver {
 
     public static ArrayList<Process> waitingQueue = new ArrayList<Process>();
-    public static int schedulerFlag = 0;
     public static int position = 0;
     public static int rrPosition = 0;
     public static int quitTime = 0;
+    public static int numProcesses = 0;
     public static ArrayList<Process> compareProcesses = new ArrayList<Process>();
     public static ArrayList<Process> processes = new ArrayList<Process>();
 
-    public static void main(String[] args) throws FileNotFoundException, InterruptedException{
-        int numProcesses = 0;
-        int numFiles = 0;
-        int state = 1;
-        int minMemory = 0;
-        int runtime = 0;
-        int numParse = 0;
-        int random = 0;
-        int cyclePercent = 0;
-        int index = 0;
-        int numCycles = 0;
-        int instructionIndex = 0;
-        String name = " ";
-        String parse = " ";
+    private static int state = 1;
+    private static int minMemory = 0;
+    private static int runtime = 0;
+    private static int numParse = 0;
+    private static int random = 0;
+    private static int cyclePercent = 0;
+    private static int numCycles = 0;
+    private static int instructionIndex = 0;
+    private static int index = 0;
+    private static String name = " ";
+    private static String parse = " ";
+    private static String inputFileName = " ";
+    private static Random rand = new Random();
 
-        Random rand = new Random();
+    public static void main(String[] args) throws FileNotFoundException, InterruptedException{
+
+        int numFiles = 0;
         Scanner input = new Scanner(System.in);
         System.out.println("Enter desired number of program files: ");
         numFiles = input.nextInt();
@@ -55,7 +56,7 @@ public class OSDriver {
          */
         while (numFiles != 0) {
             index = 0;
-            String inputFileName = promptForFileName();
+            //inputFileName = promptForFileName();
             System.out.println("Enter desired number of processes: ");
             numProcesses = input.nextInt();
 
@@ -63,149 +64,7 @@ public class OSDriver {
              ** This while loop loops for the selected number of processes from a specifies
              */
             while (index < numProcesses) {
-                File readFile = getFile(inputFileName);
-                Scanner reader = new Scanner(readFile);
-                parse = reader.nextLine();
-                numParse = parse.indexOf("Name:") + 5;
-                parse = parse.substring(numParse).trim();
-                name = parse;
-                parse = reader.nextLine();
-                numParse = parse.indexOf("Memory:") + 7;
-                parse = parse.substring(numParse).trim();
-                minMemory = Integer.parseInt(parse);
-                parse = reader.nextLine();
-                numParse = parse.indexOf("Total runtime:") + 15;
-                parse = parse.substring(numParse).trim();
-                runtime = Integer.parseInt(parse);
-
-
-                //System.out.println(numProcesses);
-                ArrayList<Instruction> instructions = new ArrayList<Instruction>();
-                ArrayList<Integer> pageTable = new ArrayList<>();
-                Process process = new Process(state, minMemory, runtime, name, instructions, instructionIndex, 0, 0, pageTable);
-                runtime = 0;
-
-                /*
-                 **This while loop reads in all the instructions of the process from the file
-                 */
-                while (!parse.contains("EXE")) {
-
-                    /*
-                     ** This reads in the calculate instruction and randomally edits
-                     ** the number of cycles needed to complete the instruction
-                     */
-                    if (parse.contains("CALCULATE")) {
-                        numParse = parse.indexOf("CALCULATE") + 9;
-                        parse = parse.substring(numParse).trim();
-                        numCycles = Integer.parseInt(parse);
-                        cyclePercent = numCycles / 5;
-                        random = rand.nextInt(2);
-
-                        if (random == 0) {
-                            numCycles = numCycles - rand.nextInt(cyclePercent);
-                        } else {
-                            numCycles = numCycles + rand.nextInt(cyclePercent);
-                        }
-
-                        runtime += numCycles;
-                        System.out.println("calc");
-                        Instruction next = new Instruction("CALCULATE", numCycles);
-                        instructions.add(next);
-                    }
-
-                    /*
-                     ** This reads in the i/o instruction and randomally edits
-                     ** the number of cycles needed to complete the instruction
-                     */
-                    else if (parse.contains("I/O")) {
-                        numParse = parse.indexOf("I/O") + 3;
-                        parse = parse.substring(numParse).trim();
-                        numCycles = Integer.parseInt(parse);
-                        cyclePercent = numCycles / 5;
-                        random = rand.nextInt(2);
-
-                        if (random == 0) {
-                            numCycles = numCycles - ((int) Math.random() * cyclePercent);
-                        } else {
-                            numCycles = numCycles + ((int) Math.random() * cyclePercent);
-                        }
-
-                        //runtime += numCycles;
-                        System.out.println("i/o");
-                        Instruction next = new Instruction("I/O", numCycles);
-                        instructions.add(next);
-                    }
-
-                    /*
-                     ** This reads in the yield instruction
-                     */
-                    else if (parse.contains("YIELD")) {
-                        numCycles = 0;
-                        System.out.println("yield");
-                        Instruction next = new Instruction("YIELD", numCycles);
-                        instructions.add(next);
-                    }
-
-                    /*
-                     ** This reads in the critical instruction
-                     */
-                    else if (parse.contains("CRITICAL")) {
-                        numCycles = 0;
-                        System.out.println("critical");
-                        Instruction next = new Instruction("CRITICAL", numCycles);
-                        instructions.add(next);
-                    }
-
-                    /*
-                     ** This reads in the end instruction
-                     */
-                    else if (parse.contains("END")) {
-                        numCycles = 0;
-                        System.out.println("end");
-                        Instruction next = new Instruction("END", numCycles);
-                        instructions.add(next);
-                    }
-
-                    else if (parse.contains("FORK")) {
-                        numCycles = 0;
-                        System.out.println("fork");
-                        Instruction next = new Instruction("FORK", numCycles);
-                        instructions.add(next);
-                    }
-
-                    /*
-                     ** This reads in the out instruction and randomally edits
-                     ** the number of cycles needed to complete the instruction
-                     */
-                    else if (parse.contains("OUT")) {
-                        numParse = parse.indexOf("OUT") + 3;
-                        parse = parse.substring(numParse).trim();
-                        numCycles = Integer.parseInt(parse);
-                        cyclePercent = numCycles / 5;
-                        random = rand.nextInt(2);
-
-                        if (random == 0) {
-                            numCycles = numCycles - rand.nextInt(cyclePercent);
-                        } else {
-                            numCycles = numCycles + rand.nextInt(cyclePercent);
-                        }
-
-                        runtime += numCycles;
-                        System.out.println("out");
-                        Instruction next = new Instruction("OUT", numCycles);
-                        instructions.add(next);
-                    }
-
-                    parse = reader.nextLine();
-                }
-                process.setInstructions(instructions);
-                process.setRuntime(runtime);
-                System.out.println(runtime);
-                process.setPriority(rand.nextInt(10) + 1);
-                process.setVariable(rand.nextInt(100) + 1);
-                waitingQueue.add(process);
-                compareProcesses.add(process);
-                index++;
+                collectProcesses();
             }
             numFiles--;
 
@@ -224,6 +83,152 @@ public class OSDriver {
         System.out.println("Enter an input file name: ");
         String inputFileName = in.next();
         return inputFileName;
+    }
+
+    public static void collectProcesses()throws FileNotFoundException{
+        inputFileName = promptForFileName();
+        while(index < numProcesses) {
+            File readFile = getFile(inputFileName);
+            Scanner reader = new Scanner(readFile);
+            parse = reader.nextLine();
+            numParse = parse.indexOf("Name:") + 5;
+            parse = parse.substring(numParse).trim();
+            name = parse;
+            parse = reader.nextLine();
+            numParse = parse.indexOf("Memory:") + 7;
+            parse = parse.substring(numParse).trim();
+            minMemory = Integer.parseInt(parse);
+            parse = reader.nextLine();
+            numParse = parse.indexOf("Total runtime:") + 15;
+            parse = parse.substring(numParse).trim();
+            runtime = Integer.parseInt(parse);
+
+
+            ArrayList<Instruction> instructions = new ArrayList<Instruction>();
+            ArrayList<Integer> pageTable = new ArrayList<>();
+            Process process = new Process(state, minMemory, runtime, name, instructions, instructionIndex, 0, 0, pageTable);
+            runtime = 0;
+
+            /*
+             **This while loop reads in all the instructions of the process from the file
+             */
+            while (!parse.contains("EXE")) {
+
+                /*
+                 ** This reads in the calculate instruction and randomally edits
+                 ** the number of cycles needed to complete the instruction
+                 */
+                if (parse.contains("CALCULATE")) {
+                    numParse = parse.indexOf("CALCULATE") + 9;
+                    parse = parse.substring(numParse).trim();
+                    numCycles = Integer.parseInt(parse);
+                    cyclePercent = numCycles / 5;
+                    random = rand.nextInt(2);
+
+                    if (random == 0) {
+                        numCycles = numCycles - rand.nextInt(cyclePercent);
+                    } else {
+                        numCycles = numCycles + rand.nextInt(cyclePercent);
+                    }
+
+                    runtime += numCycles;
+                    System.out.println("calc");
+                    Instruction next = new Instruction("CALCULATE", numCycles);
+                    instructions.add(next);
+                }
+
+                /*
+                 ** This reads in the i/o instruction and randomally edits
+                 ** the number of cycles needed to complete the instruction
+                 */
+                else if (parse.contains("I/O")) {
+                    numParse = parse.indexOf("I/O") + 3;
+                    parse = parse.substring(numParse).trim();
+                    numCycles = Integer.parseInt(parse);
+                    cyclePercent = numCycles / 5;
+                    random = rand.nextInt(2);
+
+                    if (random == 0) {
+                        numCycles = numCycles - ((int) Math.random() * cyclePercent);
+                    } else {
+                        numCycles = numCycles + ((int) Math.random() * cyclePercent);
+                    }
+
+                    //runtime += numCycles;
+                    System.out.println("i/o");
+                    Instruction next = new Instruction("I/O", numCycles);
+                    instructions.add(next);
+                }
+
+                /*
+                 ** This reads in the yield instruction
+                 */
+                else if (parse.contains("YIELD")) {
+                    numCycles = 0;
+                    System.out.println("yield");
+                    Instruction next = new Instruction("YIELD", numCycles);
+                    instructions.add(next);
+                }
+
+                /*
+                 ** This reads in the critical instruction
+                 */
+                else if (parse.contains("CRITICAL")) {
+                    numCycles = 0;
+                    System.out.println("critical");
+                    Instruction next = new Instruction("CRITICAL", numCycles);
+                    instructions.add(next);
+                }
+
+                /*
+                 ** This reads in the end instruction
+                 */
+                else if (parse.contains("END")) {
+                    numCycles = 0;
+                    System.out.println("end");
+                    Instruction next = new Instruction("END", numCycles);
+                    instructions.add(next);
+                } else if (parse.contains("FORK")) {
+                    numCycles = 0;
+                    System.out.println("fork");
+                    Instruction next = new Instruction("FORK", numCycles);
+                    instructions.add(next);
+                }
+
+                /*
+                 ** This reads in the out instruction and randomally edits
+                 ** the number of cycles needed to complete the instruction
+                 */
+                else if (parse.contains("OUT")) {
+                    numParse = parse.indexOf("OUT") + 3;
+                    parse = parse.substring(numParse).trim();
+                    numCycles = Integer.parseInt(parse);
+                    cyclePercent = numCycles / 5;
+                    random = rand.nextInt(2);
+
+                    if (random == 0) {
+                        numCycles = numCycles - rand.nextInt(cyclePercent);
+                    } else {
+                        numCycles = numCycles + rand.nextInt(cyclePercent);
+                    }
+
+                    runtime += numCycles;
+                    System.out.println("out");
+                    Instruction next = new Instruction("OUT", numCycles);
+                    instructions.add(next);
+                }
+
+                parse = reader.nextLine();
+            }
+            process.setInstructions(instructions);
+            process.setRuntime(runtime);
+            System.out.println(runtime);
+            process.setPriority(rand.nextInt(10) + 1);
+            process.setVariable(rand.nextInt(100) + 1);
+            waitingQueue.add(process);
+            compareProcesses.add(process);
+            index++;
+        }
     }
 
     /*
@@ -317,7 +322,7 @@ public class OSDriver {
         if(rrPosition == compareProcesses.size()){
             rrPosition = 0;
         }
-        compareProcesses = MMU.checkLimitRR(compareProcesses);
+        //rrMemCheck(compareProcesses);
         Dispatcher.rrDispatch(compareProcesses);
     }
     /*
@@ -326,6 +331,11 @@ public class OSDriver {
     public static ArrayList<Process> memCheck(ArrayList<Process> processes) throws FileNotFoundException, InterruptedException{
         processes = MMU.checkLimit(processes);
         return Scheduler.scheduling(processes);
+    }
+
+    public static ArrayList<Process> rrMemCheck(ArrayList<Process> processes) throws FileNotFoundException, InterruptedException{
+        processes = MMU.checkLimitRR(processes);
+        return Scheduler.rrScheduling(processes);
     }
 
 }

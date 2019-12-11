@@ -8,9 +8,11 @@ import src.com.example.osdriver.OSDriver;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 import static src.com.example.cpu.CPU.processesThread;
 import static src.com.example.cpu.CPU.rrProcessesThread;
+import static src.com.example.osdriver.OSDriver.*;
 
 public class Dispatcher{
 
@@ -28,6 +30,9 @@ public class Dispatcher{
     }
 
     public static void rrDispatch(ArrayList<Process> processes)throws FileNotFoundException, InterruptedException{
+        if(processes.size() == 0){
+            System.exit(0);
+        }
         processes.get(OSDriver.rrPosition).setState(2);
         CPU.rrProcessor(processes);
         }
@@ -66,19 +71,21 @@ public class Dispatcher{
         waitingProcess.setIndex(waitingProcess.getIndex() + 1);
         waitingProcess.getPageTable().remove(0);
         OSDriver.rrPosition++;
-        OSDriver.getRRDispatcher();
+        getRRDispatcher();
     }
 
     public static void handleTimeout()throws FileNotFoundException, InterruptedException{
             OSDriver.rrPosition++;
             CPU.timeQuantum = 50;
-            OSDriver.getRRDispatcher();
+            getRRDispatcher();
     }
 
     /*
     ** handleTermination removes a process from the system and calls the dispatcher for the next process
      */
     public static void handleTermination(ArrayList<Process> processes)throws FileNotFoundException, InterruptedException{
+        Scanner input = new Scanner(System.in);
+        String readInput;
         System.out.println("Number of processes: " + processes.size());
         processes.get(OSDriver.position).setState(5);
         MMU.memUsed -= processes.get(OSDriver.position).getMemory();
@@ -86,11 +93,21 @@ public class Dispatcher{
         processes.remove(OSDriver.position);
         System.out.println("Passed remove");
         System.out.println("Number of processes: " + processes.size());
-        OSDriver.memCheck(processes);
+        System.out.println("Would you like to add a new process? (Y or N)");
+        readInput = input.nextLine();
+
+        if(readInput.trim().equals("y") || readInput.trim().equals("Y")){
+            OSDriver.numProcesses++;
+            OSDriver.collectProcesses();
+        }
+
+        memCheck(processes);
         OSDriver.getDispatcher();
     }
 
      public static void rrHandleTermination()throws FileNotFoundException, InterruptedException{
+        Scanner input = new Scanner(System.in);
+        String readInput;
         ArrayList<Process> processes = OSDriver.compareProcesses;
         System.out.println("Number of processes: " + processes.size());
         processes.get(OSDriver.rrPosition).setState(5);
@@ -100,8 +117,19 @@ public class Dispatcher{
         System.out.println("Passed remove");
         System.out.println("RR handled");
         System.out.println("Number of processes: " + processes.size());
-        OSDriver.memCheck(processes);
-        OSDriver.getRRDispatcher();
+        if(compareProcesses.size() > 0) {
+            compareProcesses.get(0).setState(2);
+        }
+        System.out.println("Would you like to add a new process? (Y or N)");
+        readInput = input.nextLine();
+
+         if(readInput.trim().equals("y") || readInput.trim().equals("Y")){
+             OSDriver.numProcesses++;
+             OSDriver.collectProcesses();
+         }
+
+        rrMemCheck(processes);
+        getRRDispatcher();
     }
 
 

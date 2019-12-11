@@ -243,7 +243,9 @@ public class CPU{
                     }
                 }
                 running.setRuntime(runtimeRemaining);
-                running.getPageTable().remove(0);
+                if(timeQuantum != 0) {
+                    running.getPageTable().remove(0);
+                }
             }
 
             /*
@@ -283,7 +285,7 @@ public class CPU{
 
             else if (runningInstruction.getInstructionName().equals("FORK")) {
                 childTime = handleFork(running);
-                rrProcessesThread.setTime(rrProcessesThread.getTime() + 95);//childTime);
+                rrProcessesThread.setTime(rrProcessesThread.getTime() + 95);
                 running.getPageTable().remove(0);
             }
 
@@ -323,8 +325,9 @@ public class CPU{
                     }
                 }
                 running.setRuntime(runtimeRemaining);
-                if(running.getPageTable().size() != 0) {
+                if(running.getPageTable().size() != 0 && timeQuantum != 0) {
                     running.getPageTable().remove(0);
+
                 }
 
                 if(numCycles == 0) {
@@ -356,7 +359,7 @@ public class CPU{
             processesThread.start();
         }
         if(rrProcessesThread.getState() != Thread.State.RUNNABLE ) {
-            rrProcessesThread.start();
+            //rrProcessesThread.start();
         }
     }
 
