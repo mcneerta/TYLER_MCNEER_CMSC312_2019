@@ -120,13 +120,6 @@ public class Dispatcher{
         if(compareProcesses.size() > 0) {
             compareProcesses.get(0).setState(2);
         }
-        System.out.println("Would you like to add a new process? (Y or N)");
-        readInput = input.nextLine();
-
-         if(readInput.trim().equals("y") || readInput.trim().equals("Y")){
-             OSDriver.numProcesses++;
-             OSDriver.collectProcesses();
-         }
 
         rrMemCheck(processes);
         getRRDispatcher();
