@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
 
-import static src.com.example.mmu.MMU.checkLimitRR;
 
 /*
 ** This is the driver class for the OS simulator

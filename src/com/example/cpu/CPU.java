@@ -52,6 +52,7 @@ public class CPU{
         ArrayList<Instruction> instructions = running.getInstructions();
         int numCycles = 0;
         int childTime = 0;
+        Random rand = new Random();
 
         System.out.println("Index: " + index);
         System.out.println("Number of instructions remaining: " + (instructions.size() - index));
@@ -68,6 +69,12 @@ public class CPU{
 
                 if(processesThread.getTime() == OSDriver.quitTime && OSDriver.quitTime != 0){
                     System.exit(0);
+                }
+                /*
+                **This creates the random hardware interrupt
+                 */
+                if(rand.nextInt(100) == 0){
+                    Dispatcher.handleInterrupts(processes);
                 }
 
                 /*
@@ -204,6 +211,7 @@ public class CPU{
         ArrayList<Instruction> instructions = running.getInstructions();
         int numCycles = 0;
         int childTime = 0;
+        Random rand = new Random();
 
         System.out.println("Index: " + index);
         System.out.println("Number of instructions remaining: " + (instructions.size() - index));
@@ -217,6 +225,13 @@ public class CPU{
 
             if(rrProcessesThread.getTime() == OSDriver.quitTime && OSDriver.quitTime != 0){
                 System.exit(0);
+            }
+
+            /*
+             **This creates the random hardware interrupt
+             */
+            if(rand.nextInt(100) == 0){
+                Dispatcher.rrHandleInterrupts(processes);
             }
 
             /*
@@ -359,7 +374,7 @@ public class CPU{
             processesThread.start();
         }
         if(rrProcessesThread.getState() != Thread.State.RUNNABLE ) {
-            //rrProcessesThread.start();
+            rrProcessesThread.start();
         }
     }
 

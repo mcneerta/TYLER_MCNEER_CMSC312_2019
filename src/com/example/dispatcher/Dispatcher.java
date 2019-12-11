@@ -106,8 +106,6 @@ public class Dispatcher{
     }
 
      public static void rrHandleTermination()throws FileNotFoundException, InterruptedException{
-        Scanner input = new Scanner(System.in);
-        String readInput;
         ArrayList<Process> processes = OSDriver.compareProcesses;
         System.out.println("Number of processes: " + processes.size());
         processes.get(OSDriver.rrPosition).setState(5);
